@@ -1,0 +1,139 @@
+/* Global Custom Styles */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+}
+
+/* Map container styling */
+.map-container {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Page transitions / layouts */
+.page-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Safari support */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* Fallback for browsers that don't support backdrop-filter */
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Additional fixes for better compatibility */
+* {
+  box-sizing: border-box;
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient backgrounds */
+.bg-gradient-red {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+}
+
+.bg-gradient-green {
+  background: linear-gradient(135deg, #10b981, #14b8a6);
+}
+
+.bg-gradient-blue {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+}
+
+/* PrimeReact button overrides */
+.p-button-lg {
+  transition: all 0.25s ease;
+}
+
+.p-button-lg:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3) !important;
+}
+
+.p-button-lg:active {
+  transform: scale(0.97);
+}
+
+/* Card hover effects */
+.hover\:shadow-5:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Surface card dark mode */
+.surface-card {
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Typography improvements */
+.text-600 {
+  color: #64748b !important;
+}
+
+.text-500 {
+  color: #94a3b8 !important;
+}
+
+/* Max width utility */
+.max-w-50rem {
+  max-width: 50rem;
+}
+
+.max-w-30rem {
+  max-width: 30rem;
+}
+
+.max-w-20rem {
+  max-width: 20rem;
+}
+
+.max-w-1200 {
+  max-width: 1200px;
+}
+
+/* Dark mode text colors */
+.text-gray-800 {
+  color: #1e293b !important;
+}
+
+.text-gray-300 {
+  color: #cbd5e1 !important;
+}
+
+.text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+.text-gray-600 {
+  color: #64748b !important;
+}
+
+/* Z-index utilities */
+.z-1 {
+  z-index: 1 !important;
+}
+
+.z-5 {
+  z-index: 5 !important;
+}
