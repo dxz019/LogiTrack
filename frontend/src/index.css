@@ -4,7 +4,8 @@ html, body, #root {
   width: 100%;
   margin: 0;
   padding: 0;
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* Map container styling */
@@ -14,7 +15,7 @@ html, body, #root {
   min-height: 400px;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
 }
 
 /* Page transitions / layouts */
@@ -24,27 +25,26 @@ html, body, #root {
   margin: 0 auto;
 }
 
+/* Glass morphism effects */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  /* Fallback for browsers that don't support backdrop-filter */
-  background-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Additional fixes for better compatibility */
-* {
-  box-sizing: border-box;
-}
-
-/* Glassmorphism card */
 .glass-card {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
 }
 
 /* Gradient backgrounds */
@@ -60,23 +60,33 @@ html, body, #root {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
 }
 
-/* PrimeReact button overrides */
+.bg-primary-reverse {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.border-primary {
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* PrimeReact button overrides with enhanced effects */
 .p-button-lg {
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
 }
 
 .p-button-lg:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4) !important;
 }
 
 .p-button-lg:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
-/* Card hover effects */
+/* Card hover effects with depth */
 .hover\:shadow-5:hover {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  transform: translateY(-4px);
 }
 
 /* Surface card dark mode */
@@ -93,6 +103,22 @@ html, body, #root {
 
 .text-500 {
   color: #94a3b8 !important;
+}
+
+.text-gray-800 {
+  color: #e2e8f0 !important;
+}
+
+.text-gray-300 {
+  color: #cbd5e1 !important;
+}
+
+.text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+.text-gray-600 {
+  color: #9ca3af !important;
 }
 
 /* Max width utility */
@@ -112,23 +138,6 @@ html, body, #root {
   max-width: 1200px;
 }
 
-/* Dark mode text colors */
-.text-gray-800 {
-  color: #1e293b !important;
-}
-
-.text-gray-300 {
-  color: #cbd5e1 !important;
-}
-
-.text-gray-400 {
-  color: #94a3b8 !important;
-}
-
-.text-gray-600 {
-  color: #64748b !important;
-}
-
 /* Z-index utilities */
 .z-1 {
   z-index: 1 !important;
@@ -136,4 +145,109 @@ html, body, #root {
 
 .z-5 {
   z-index: 5 !important;
+}
+
+/* Input group enhancements */
+.p-inputgroup .p-inputgroup-addon {
+  transition: all 0.2s ease;
+}
+
+.p-inputgroup:hover .p-inputgroup-addon {
+  background: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Link hover effects */
+a {
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #60a5fa !important;
+}
+
+/* Floating animation for hero elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.float-animation {
+  animation: float 20s ease-in-out infinite;
+}
+
+/* Glow effect for interactive elements */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.glow-blue:hover {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+}
+
+/* Animated gradient border */
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(59, 130, 246, 0.3); }
+  50% { border-color: rgba(99, 102, 241, 0.6); }
+}
+
+.animated-border {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+/* Pulse animation for loading/skeleton */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+/* DataTable custom styling */
+.p-datatable .p-datatable-thead > tr > th {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 0.2s ease;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Status timeline custom */
+.customized-timeline .p-timeline-event-marker {
+  transition: all 0.3s ease;
+}
+
+.customized-timeline .p-timeline-event-content {
+  transition: all 0.3s ease;
+}
+
+/* Badge glow for notifications */
+.p-badge {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }

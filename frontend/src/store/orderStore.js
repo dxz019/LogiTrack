@@ -17,6 +17,10 @@ const useOrderStore = create((set, get) => ({
     }
   },
 
+  getOrders: async () => {
+    await get().fetchOrders();
+  },
+
   getOrderById: async (id) => {
     set({ loading: true, error: null });
     try {
@@ -58,6 +62,13 @@ const useOrderStore = create((set, get) => ({
       set({ error: error.message, loading: false });
       throw error;
     }
+  },
+
+  updateOrderStatus: (orderId, status) => {
+    set((state) => ({
+      orders: state.orders.map(o => o.id === orderId ? { ...o, status } : o),
+      currentOrder: state.currentOrder?.id === orderId ? { ...state.currentOrder, status } : state.currentOrder
+    }));
   }
 }));
 

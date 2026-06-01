@@ -28,6 +28,10 @@ class User {
     );
     return result.rows[0];
   }
+
+  static async deleteById(id) {
+    await pool.query('DELETE FROM users WHERE id = $1', [id]);
+  }
 }
 
 module.exports = User;

@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toast } from 'primereact/toast';
 import useAuthStore from './store/authStore';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import TrackOrder from './pages/TrackOrder';
+import OrderHistory from './pages/OrderHistory';
 import DriverApp from './pages/DriverApp';
 import AdminPanel from './pages/AdminPanel';
 
@@ -37,15 +39,23 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* Customer Route */}
-        <Route 
-          path="/track/:orderId" 
-          element={
-            <ProtectedRoute roles={['customer', 'admin']}>
-              <TrackOrder />
-            </ProtectedRoute>
-          } 
-        />
+{/* Customer Routes */}
+         <Route 
+           path="/track/:orderId" 
+           element={
+             <ProtectedRoute roles={['customer', 'admin']}>
+               <TrackOrder />
+             </ProtectedRoute>
+           } 
+         />
+         <Route 
+           path="/orders" 
+           element={
+             <ProtectedRoute roles={['customer']}>
+               <OrderHistory />
+             </ProtectedRoute>
+           } 
+         />
         
         {/* Driver Route */}
         <Route 

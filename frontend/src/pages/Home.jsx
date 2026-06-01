@@ -241,22 +241,28 @@ const Home = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="relative py-6 overflow-hidden"
+            className="relative py-6 overflow-hidden min-h-screen"
           >
             <motion.div
-              className="absolute top-0 left-20 w-30rem h-30rem bg-blue-500 opacity-10 border-circle"
+              className="absolute top-0 left-20 w-30rem h-30rem bg-blue-500 opacity-20 border-circle"
               style={{ filter: 'blur(100px)' }}
               animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
               transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute bottom-0 right-20 w-25rem h-25rem bg-indigo-500 opacity-10 border-circle"
+              className="absolute bottom-0 right-20 w-25rem h-25rem bg-indigo-500 opacity-20 border-circle"
               style={{ filter: 'blur(80px)' }}
               animate={{ x: [0, -50, 0], y: [0, -30, 0] }}
               transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
             />
+            <motion.div
+              className="absolute top-20 right-40 w-20rem h-20rem bg-purple-500 opacity-15 border-circle"
+              style={{ filter: 'blur(60px)' }}
+              animate={{ x: [0, 30, 0], y: [0, 40, 0] }}
+              transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+            />
 
-            <div className="relative z-1 px-4 py-6 max-w-1200 mx-auto text-center">
+            <div className="relative z-1 px-4 py-6 max-w-1200 mx-auto text-center flex flex-column align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -265,6 +271,13 @@ const Home = () => {
                 <h1 className="text-5xl md:text-6xl font-extrabold mb-4 text-white" style={{ lineHeight: '1.2' }}>
                   Fast, Reliable<br />
                   <span className="text-blue-400">Delivery Logistics</span>
+                  <motion.span
+                    className="inline-block ml-2"
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    🚚
+                  </motion.span>
                 </h1>
                 <p className="text-xl text-gray-300 mx-auto mb-5" style={{ maxWidth: '600px' }}>
                   Track your packages in real-time with our network of professional drivers.
@@ -274,7 +287,7 @@ const Home = () => {
                 <div className="flex flex-wrap gap-3 justify-content-center mb-6">
                   <Link to="/register">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button label="Get Started Free" icon="pi pi-arrow-right" className="p-button-lg p-button-rounded font-bold bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600 shadow-3" />
+                      <Button label="Get Started Free" icon="pi pi-arrow-right" className="p-button-lg p-button-rounded font-bold bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600 shadow-3 glow-blue" />
                     </motion.div>
                   </Link>
                   <Link to="/login">
@@ -292,26 +305,26 @@ const Home = () => {
                   transition={{ duration: 0.7, delay: 0.8 }}
                   className="max-w-50rem mx-auto mt-6"
                 >
-                  <div className="border-round-xl p-4 shadow-5" style={{ 
+                  <div className="border-round-xl p-4 shadow-5 animated-border" style={{ 
                     background: 'rgba(255,255,255,0.08)',
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.15)'
+                    border: '1px solid rgba(59,130,246,0.3)'
                   }}>
                     <div className="grid text-center">
                       <div className="col-6 md:col-3">
-                        <div className="text-blue-400 text-2xl font-bold"><AnimatedCounter from={0} to={250} />M</div>
+                        <div className="text-blue-400 text-2xl md:text-3xl font-bold"><AnimatedCounter from={0} to={250} />M+</div>
                         <div className="text-gray-400 text-sm">Active Users</div>
                       </div>
                       <div className="col-6 md:col-3">
-                        <div className="text-green-400 text-2xl font-bold"><AnimatedCounter from={0} to={99} />%</div>
+                        <div className="text-green-400 text-2xl md:text-3xl font-bold"><AnimatedCounter from={0} to={99} />%</div>
                         <div className="text-gray-400 text-sm">On-Time Delivery</div>
                       </div>
                       <div className="col-6 md:col-3">
-                        <div className="text-yellow-400 text-2xl font-bold"><AnimatedCounter from={0} to={150} />+</div>
+                        <div className="text-yellow-400 text-2xl md:text-3xl font-bold"><AnimatedCounter from={0} to={150} />+</div>
                         <div className="text-gray-400 text-sm">Cities Covered</div>
                       </div>
                       <div className="col-6 md:col-3">
-                        <div className="text-indigo-400 text-2xl font-bold"><AnimatedCounter from={0} to={24} />/7</div>
+                        <div className="text-indigo-400 text-2xl md:text-3xl font-bold"><AnimatedCounter from={0} to={24} />/7</div>
                         <div className="text-gray-400 text-sm">Support</div>
                       </div>
                     </div>
@@ -321,7 +334,14 @@ const Home = () => {
             </div>
           </motion.div>
 
-          <div className="py-6 px-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="py-6 px-4 relative"
+            style={{ background: 'radial-gradient(circle at center, rgba(59,130,246,0.1), transparent 70%)' }}
+          >
             <div className="max-w-1200 mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -365,7 +385,7 @@ const Home = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           <div className="py-6 px-4" style={{ background: 'rgba(15,23,42,0.5)' }}>
             <div className="max-w-1200 mx-auto">
@@ -389,8 +409,12 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="py-6 px-4">
-            <div className="max-w-1200 mx-auto">
+          <div className="py-6 px-4 relative">
+            <motion.div
+              className="absolute inset-0"
+              style={{ background: 'radial-gradient(ellipse at top, rgba(59,130,246,0.05), transparent)' }}
+            />
+            <div className="max-w-1200 mx-auto relative z-1">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}

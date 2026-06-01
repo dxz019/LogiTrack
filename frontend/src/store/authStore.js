@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import axios from 'axios';
 import api from '../services/api';
 
 const useAuthStore = create((set) => ({
@@ -10,30 +11,36 @@ const useAuthStore = create((set) => ({
   setAccessToken: (token) => set({ accessToken: token }),
 
   login: async (email, password) => {
+    set({ loading: true });
     try {
       const res = await api.post('/auth/login', { email, password });
       set({ 
         user: res.data.user, 
         accessToken: res.data.accessToken, 
-        isAuthenticated: true 
+        isAuthenticated: true,
+        loading: false
       });
-      return true;
+      return res.data.user;
     } catch (error) {
+      set({ loading: false });
       console.error('Login failed', error);
       throw error;
     }
   },
 
   register: async (userData) => {
+    set({ loading: true });
     try {
       const res = await api.post('/auth/register', userData);
       set({ 
         user: res.data.user, 
         accessToken: res.data.accessToken, 
-        isAuthenticated: true 
+        isAuthenticated: true,
+        loading: false
       });
-      return true;
+      return res.data.user;
     } catch (error) {
+      set({ loading: false });
       console.error('Register failed', error);
       throw error;
     }
@@ -45,27 +52,24 @@ const useAuthStore = create((set) => ({
     } catch (e) {
       // Ignore error
     } finally {
-      set({ user: null, accessToken: null, isAuthenticated: false });
+      set({ user: null, accessToken: null, isAuthenticated: false, loading: false });
     }
   },
 
   checkAuth: async () => {
+    set({ loading: true });
     try {
-      // We can try to refresh token. If successful, get user info.
       const res = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
       const token = res.data.accessToken;
       
-      // We can't use api here initially because we need to set the token first
-      set({ accessToken: token });
+      set({ accessToken: token, loading: false });
       
       const userRes = await api.get('/auth/me');
-      set({ user: userRes.data.user, isAuthenticated: true, loading: false });
+      set({ user: userRes.data.user, isAuthenticated: true });
     } catch (error) {
       set({ user: null, accessToken: null, isAuthenticated: false, loading: false });
     }
   }
 }));
-
-import axios from 'axios'; // For the direct refresh call in checkAuth
 
 export default useAuthStore;
