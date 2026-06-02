@@ -1,0 +1,46 @@
+import React from 'react';
+
+// Placeholder SVG data URI for hero truck - replace with actual image
+const HeroPlaceholder = () => (
+  <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto opacity-80">
+    <defs>
+      <linearGradient id="truckGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#2563EB"/>
+        <stop offset="100%" stopColor="#7C3AED"/>
+      </linearGradient>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    
+    {/* Highway with neon trail */}
+    <rect x="0" y="300" width="600" height="40" fill="#0a1020"/>
+    <path d="M0 320 L600 320" stroke="var(--blue)" strokeWidth="2" opacity="0.5"/>
+    
+    {/* Semi-truck */}
+    <rect x="150" y="260" width="200" height="50" rx="8" fill="url(#truckGradient)" filter="url(#glow)"/>
+    <text x="250" y="295" fontSize="14" textAnchor="middle" fill="white" fontWeight="bold">LogiTrack</text>
+    
+    {/* Trailer */}
+    <rect x="350" y="240" width="180" height="70" rx="6" fill="#1e293b"/>
+    
+    {/* Glowing Earth globe */}
+    <circle cx="480" cy="180" r="50" fill="#020818" stroke="var(--blue)" strokeWidth="2"/>
+    <circle cx="480" cy="180" r="40" fill="none" stroke="var(--blue)" strokeWidth="1" strokeDasharray="4,2"/>
+    <path d="M440 180 Q460 160 480 180 Q500 200 520 180" stroke="var(--blue)" strokeWidth="1" opacity="0.7"/>
+    
+    {/* Network lines */}
+    <line x1="480" y1="180" x2="300" y2="280" stroke="var(--blue)" strokeWidth="1" opacity="0.3"/>
+    <line x1="480" y1="180" x2="500" y2="300" stroke="#8B5CF6" strokeWidth="1" opacity="0.3"/>
+    
+    {/* Location pins */}
+    <circle cx="200" cy="280" r="6" fill="var(--blue)"/>
+    <circle cx="400" cy="260" r="6" fill="#8B5CF6"/>
+  </svg>
+);
+
+export default HeroPlaceholder;

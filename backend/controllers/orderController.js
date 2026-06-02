@@ -1,54 +1,49 @@
+// Order controller - handles order creation and retrieval
+// All routes protected with JWT authentication and role-based access
+
 const Order = require('../models/Order');
 const MapsService = require('../services/mapsService');
 
 class OrderController {
-  /**
-   * Create a new order
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   */
+  // Create new order - geocodes addresses, calculates route
   static async createOrder(req, res) {
     try {
       const {
-        pickupAddress,
-        deliveryAddress,
-        packageDescription,
-        priority = 'normal',
-        notes,
+        pickupAddress, deliveryAddress, packageDescription, priority = 'normal', notes,
+        pickupLat, pickupLng, deliveryLat, deliveryLng
       } = req.body;
 
-      const { userId } = req.user; // from auth middleware
+      const { userId } = req.user; // Set by auth middleware
 
-      // Geocode pickup and delivery addresses
-      const pickupLocation = await MapsService.geocode(pickupAddress);
-      const deliveryLocation = await MapsService.geocode(deliveryAddress);
+      // Use provided coordinates or geocode addresses
+      let pickupLocation, deliveryLocation;
+      if (pickupLat && pickupLng) {
+        pickupLocation = { lat: pickupLat, lng: pickupLng };
+      } else {
+        pickupLocation = await MapsService.geocode(pickupAddress);
+      }
+      if (deliveryLat && deliveryLng) {
+        deliveryLocation = { lat: deliveryLat, lng: deliveryLng };
+      } else {
+        deliveryLocation = await MapsService.geocode(deliveryAddress);
+      }
 
-      // Get directions (distance and duration)
-      const { distance, duration } = await MapsService.getDirections(
-        pickupLocation.lat,
-        pickupLocation.lng,
-        deliveryLocation.lat,
-        deliveryLocation.lng
+      // Get directions for distance/duration
+      const { distance, duration, polyline } = await MapsService.getDirections(
+        pickupLocation.lat, pickupLocation.lng,
+        deliveryLocation.lat, deliveryLocation.lng
       );
 
-      // Create order
+      // Create order in database
       const order = await Order.create({
-        customerId: userId,
-        pickupAddress,
-        pickupLat: pickupLocation.lat,
-        pickupLng: pickupLocation.lng,
-        deliveryAddress,
-        deliveryLat: deliveryLocation.lat,
-        deliveryLng: deliveryLocation.lng,
-        packageDescription,
-        priority,
-        notes,
+        customerId: userId, pickupAddress, pickupLat: pickupLocation.lat,
+        pickupLng: pickupLocation.lng, deliveryAddress,
+        deliveryLat: deliveryLocation.lat, deliveryLng: deliveryLocation.lng,
+        packageDescription, priority, notes
       });
 
-      // Update order with distance and duration
-      await Order.updateDistanceDuration(order.id, distance, duration);
-
-      // Fetch the updated order to return
+      // Update with calculated values
+      await Order.updateDistanceDuration(order.id, distance, duration, polyline);
       const updatedOrder = await Order.findById(order.id);
 
       res.status(201).json({ order: updatedOrder });
@@ -58,21 +53,14 @@ class OrderController {
     }
   }
 
-  /**
-   * Get all orders for the current user (customer) or all orders (admin)
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   */
+  // Get orders - customers see own orders, admins see all
   static async getOrders(req, res) {
     try {
       const { userId, role } = req.user;
       let orders;
       if (role === 'admin') {
-        // Admin can see all orders
-        const result = await Order.findAll(); // We need to add this method to Order model
-        orders = result;
+        orders = await Order.findAll();
       } else {
-        // Customer sees their own orders
         orders = await Order.findByCustomerId(userId);
       }
       res.json({ orders });
@@ -82,11 +70,7 @@ class OrderController {
     }
   }
 
-  /**
-   * Get order by ID
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   */
+  // Get single order by ID with authorization check
   static async getOrderById(req, res) {
     try {
       const { id } = req.params;
@@ -97,7 +81,7 @@ class OrderController {
         return res.status(404).json({ message: 'Order not found', code: 'ORDER_NOT_FOUND' });
       }
 
-      // Authorization: customer can only see their own orders, admin can see any, driver can see if assigned
+      // Authorization checks
       if (role === 'customer' && order.customer_id !== userId) {
         return res.status(403).json({ message: 'Insufficient permissions', code: 'INSUFFICIENT_PERMISSIONS' });
       }
@@ -112,11 +96,7 @@ class OrderController {
     }
   }
 
-  /**
-   * Cancel order (only by customer who owns it or admin)
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   */
+  // Cancel order - customer or admin only
   static async cancelOrder(req, res) {
     try {
       const { id } = req.params;
@@ -127,14 +107,10 @@ class OrderController {
         return res.status(404).json({ message: 'Order not found', code: 'ORDER_NOT_FOUND' });
       }
 
-      // Authorization
+      // Authorization check
       if (role === 'customer' && order.customer_id !== userId) {
         return res.status(403).json({ message: 'Insufficient permissions', code: 'INSUFFICIENT_PERMISSIONS' });
       }
-      if (role === 'admin') {
-        // admin can cancel any order
-      }
-      // Note: driver cannot cancel order via this endpoint (they have reject)
 
       const updatedOrder = await Order.cancelOrder(id);
       res.json({ order: updatedOrder });

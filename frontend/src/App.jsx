@@ -1,7 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toast } from 'primereact/toast';
-import useAuthStore from './store/authStore';
+import LandingPage from './pages/LandingPage';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -11,31 +10,45 @@ import DriverApp from './pages/DriverApp';
 import AdminPanel from './pages/AdminPanel';
 
 const ProtectedRoute = ({ children, roles }) => {
-  const { user, isAuthenticated, loading } = useAuthStore();
+  const [loading, setLoading] = React.useState(true);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    // Check auth status
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUser({ role: payload.role, name: payload.name });
+      } catch {
+        setUser(null);
+      }
+    }
+    setLoading(false);
+  }, []);
 
   if (loading) return (
-    <div className="flex align-items-center justify-content-center h-screen" style={{ background: 'linear-gradient(135deg, #0f172a, #1e3a8a)' }}>
-      <i className="pi pi-spinner pi-spin text-4xl text-white"></i>
+    <div className="flex align-items-center justify-content-center h-screen" style={{ background: '#020818' }}>
+      <i className="pi pi-spinner pi-spin text-4xl" style={{ color: 'var(--blue)' }}></i>
     </div>
   );
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(user?.role)) return <Navigate to="/" replace />;
+  if (user && roles && !roles.includes(user?.role)) return <Navigate to="/" replace />;
 
   return children;
 };
 
+export { ProtectedRoute };
+
 function App() {
-  const { checkAuth } = useAuthStore();
-
-  useEffect(() => {
-    // Attempt to refresh token or get current user on load
-    checkAuth();
-  }, []);
-
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         

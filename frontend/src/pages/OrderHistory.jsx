@@ -1,25 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Tag } from 'primereact/tag';
 import { Button } from 'primereact/button';
-import { Rating } from 'primereact/rating';
 import { ConfirmDialog } from 'primereact/confirmdialog';
-import { toast } from 'primereact/usetoast';
 import { Toast } from 'primereact/toast';
 import useOrderStore from '../store/orderStore';
 import { Card } from 'primereact/card';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 export const OrderHistory = () => {
-  const { myOrders, orders, getOrders, loading } = useOrderStore();
+  const { orders, fetchOrders, loading, cancelOrder } = useOrderStore();
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const toastRef = React.useRef(null);
+  const toastRef = useRef(null);
 
   useEffect(() => {
-    getOrders();
-  }, [getOrders]);
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const showToast = (severity, summary, detail) => {
+    if (toastRef.current) {
+      toastRef.current.show({ severity, summary, detail });
+    }
+  };
 
   const statusSeverity = (status) => {
     const map = {
@@ -87,18 +90,17 @@ export const OrderHistory = () => {
   };
 
   const handleCancel = async (orderId) => {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
-    
-    // Optimistic UI update
-    // Would call API to cancel
-    toast.show({ severity: 'info', summary: 'Order Cancelled', detail: `Order #${orderId.slice(0,8)} has been cancelled` });
+    try {
+      await cancelOrder(orderId);
+      showToast('info', 'Order Cancelled', `Order #${orderId.slice(0,8)} has been cancelled`);
+    } catch (error) {
+      showToast('error', 'Cancellation Failed', 'Could not cancel order');
+    }
   };
 
   const handleRate = (orderId) => {
     setSelectedOrder(orderId);
-    // Would open rating dialog
-    toast.show({ severity: 'info', summary: 'Rate Driver', detail: 'Rating feature coming soon!' });
+    showToast('info', 'Rate Driver', 'Rating feature coming soon!');
   };
 
   return (
@@ -106,39 +108,33 @@ export const OrderHistory = () => {
       <Toast ref={toastRef} />
       <ConfirmDialog />
       
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex align-items-center mb-4">
-          <i className="pi pi-history text-3xl text-primary mr-3"></i>
-          <h1 className="m-0 text-3xl font-bold">Order History</h1>
-        </div>
+      <div className="flex align-items-center mb-4">
+        <i className="pi pi-history text-3xl text-primary mr-3"></i>
+        <h1 className="m-0 text-3xl font-bold">Order History</h1>
+      </div>
 
-        <Card className="shadow-2 border-round-xl" style={{ background: 'rgba(30,41,59,0.8)', backdropFilter: 'blur(10px)' }}>
-          <DataTable 
-            value={orders || []} 
-            loading={loading}
-            paginator 
-            rows={10}
-            emptyMessage="No orders found"
-            className="p-datatable-sm"
-            stripedRows
-            responsiveLayout="scroll"
-          >
-            <Column field="id" header="Order ID" body={(row) => `#${row.id?.slice(0, 8)}`} />
-            <Column field="pickup_address" header="Pickup" body={(row) => row.pickup_address?.substring(0, 30) + '...'} />
-            <Column field="delivery_address" header="Delivery" body={(row) => row.delivery_address?.substring(0, 30) + '...'} />
-            <Column field="status" header="Status" body={statusBodyTemplate} />
-            <Column field="priority" header="Priority" body={priorityBodyTemplate} />
-            <Column field="estimated_distance" header="Distance (km)" />
-            <Column field="created_at" header="Date" body={dateBodyTemplate} />
-            <Column field="price" header="Price" body={priceBodyTemplate} />
-            <Column header="Actions" body={actionBodyTemplate} />
-          </DataTable>
-        </Card>
-      </motion.div>
+      <Card className="shadow-2 border-round-xl">
+        <DataTable 
+          value={orders || []} 
+          loading={loading}
+          paginator 
+          rows={10}
+          emptyMessage="No orders found"
+          className="p-datatable-sm"
+          stripedRows
+          responsiveLayout="scroll"
+        >
+          <Column field="id" header="Order ID" body={(row) => `#${row.id?.slice(0, 8)}`} />
+          <Column field="pickup_address" header="Pickup" body={(row) => row.pickup_address?.substring(0, 30) + '...'} />
+          <Column field="delivery_address" header="Delivery" body={(row) => row.delivery_address?.substring(0, 30) + '...'} />
+          <Column field="status" header="Status" body={statusBodyTemplate} />
+          <Column field="priority" header="Priority" body={priorityBodyTemplate} />
+          <Column field="estimated_distance" header="Distance (km)" />
+          <Column field="created_at" header="Date" body={dateBodyTemplate} />
+          <Column field="price" header="Price" body={priceBodyTemplate} />
+          <Column header="Actions" body={actionBodyTemplate} />
+        </DataTable>
+      </Card>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import ThreeDBackground from '../components/ThreeDBackground';
 import PlaceOrderForm from '../components/Order/PlaceOrderForm';
 import useAuthStore from '../store/authStore';
 
@@ -221,6 +222,7 @@ const Home = () => {
   if (loading) {
     return (
       <div className="flex align-items-center justify-content-center h-screen" style={{ background: 'linear-gradient(135deg, #0f172a, #1e3a8a)' }}>
+        <ThreeDBackground />
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -232,17 +234,19 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}>
-      <Navbar />
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}>
+      <ThreeDBackground />
+      <div className="relative z-1">
+        <Navbar />
 
-      {!isAuthenticated ? (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative py-6 overflow-hidden min-h-screen"
-          >
+        {!isAuthenticated ? (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className="relative py-6 overflow-hidden min-h-screen"
+            >
             <motion.div
               className="absolute top-0 left-20 w-30rem h-30rem bg-blue-500 opacity-20 border-circle"
               style={{ filter: 'blur(100px)' }}
@@ -470,14 +474,14 @@ const Home = () => {
       ) : (
         <div className="py-6 px-4">
           <div className="text-center mb-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="text-4xl font-extrabold text-blue-400 mb-3">Welcome Back</h1>
-              <p className="text-xl text-gray-300 m-0">Place your delivery order below</p>
-            </motion.div>
+<motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.6 }}
+           >
+             <h1 className="text-4xl font-extrabold text-blue-400 mb-3">Welcome Back</h1>
+             <p className="text-xl text-gray-300 m-0">Place your delivery order below</p>
+           </motion.div>
           </div>
 
           <motion.div
@@ -491,7 +495,8 @@ const Home = () => {
             </div>
           </motion.div>
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

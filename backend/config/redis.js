@@ -1,8 +1,12 @@
+// Redis connection wrapper with graceful error handling
+// Used by BullMQ queues and services for caching and job processing
+
 const Redis = require('ioredis');
 
 let redis = null;
 let isConnected = false;
 
+// Create Redis connection with proper error handling
 function createRedisConnection() {
   try {
     redis = new Redis(process.env.REDIS_URL, {
@@ -10,6 +14,7 @@ function createRedisConnection() {
       connectTimeout: 10000, // 10 second timeout
     });
 
+    // Connection event handlers
     redis.on('connect', () => {
       console.log('Connected to Redis');
       isConnected = true;
@@ -39,7 +44,7 @@ function createRedisConnection() {
 // Initialize Redis connection
 redis = createRedisConnection();
 
-// Helper to check if Redis is available
+// Utility function to check if Redis is available
 function isRedisAvailable() {
   return isConnected && redis && redis.status === 'ready';
 }

@@ -2,8 +2,9 @@
 node_modules/
 
 # Build outputs
-/dist/
-/build/
+dist/
+build/
+frontend/dist/
 
 # Environment files
 .env

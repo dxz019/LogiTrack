@@ -5,10 +5,14 @@ const GOOGLE_MAPS_SERVER_KEY = process.env.GOOGLE_MAPS_SERVER_KEY;
 class MapsService {
   /**
    * Geocode an address to get latitude and longitude
+   * Uses mock coordinates in demo mode (no API key)
    * @param {string} address - Address to geocode
    * @returns {Promise<{lat: number, lng: number}>}
    */
   static async geocode(address) {
+    if (!GOOGLE_MAPS_SERVER_KEY || GOOGLE_MAPS_SERVER_KEY === 'your_google_maps_server_key') {
+      return this.getMockGeocode(address);
+    }
     try {
       const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
         params: {
@@ -29,8 +33,18 @@ class MapsService {
     }
   }
 
+  // Mock geocode for demo/development mode
+  static getMockGeocode(address) {
+    const hash = [...address].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    // Generate pseudo-random coordinates based on address hash for consistent results
+    const lat = 40.7128 + (hash % 100) / 1000;
+    const lng = -74.0060 + (hash % 100) / 1000;
+    return { lat, lng };
+  }
+
   /**
    * Get directions between two points (for route polyline)
+   * Uses mock data in demo mode (no API key)
    * @param {number} originLat - Origin latitude
    * @param {number} originLng - Origin longitude
    * @param {number} destLat - Destination latitude
@@ -38,6 +52,9 @@ class MapsService {
    * @returns {Promise<{distance: number, duration: number, polyline: string}>}
    */
   static async getDirections(originLat, originLng, destLat, destLng) {
+    if (!GOOGLE_MAPS_SERVER_KEY || GOOGLE_MAPS_SERVER_KEY === 'your_google_maps_server_key') {
+      return this.getMockDirections();
+    }
     try {
       const response = await axios.get('https://maps.googleapis.com/maps/api/directions/json', {
         params: {
@@ -62,6 +79,14 @@ class MapsService {
       console.error('Error in getting directions:', error);
       throw error;
     }
+  }
+
+  static getMockDirections() {
+    return {
+      distance: 5.2,
+      duration: 18,
+      polyline: 'a~}jHaik~cA@eA}AeA}AeA}AeA}AeA}AeA}'
+    };
   }
 
   /**

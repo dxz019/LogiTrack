@@ -1,7 +1,7 @@
 const { Worker } = require('bullmq');
 const redisWrapper = require('../config/redis');
 const AssignmentEngine = require('../services/assignmentEngine');
-const { logger } = require('../config/logger');
+const logger = require('../config/logger');
 
 // Only start worker if Redis is available
 if (redisWrapper.isRedisAvailable()) {

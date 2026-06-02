@@ -1,0 +1,71 @@
+/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: #020818;
+  color: var(--text);
+}
+
+:root {
+  --bg: #020818;
+  --bg2: #040D21;
+  --bg3: #071028;
+  --blue: #2563EB;
+  --blue2: #3B82F6;
+  --blue3: #60A5FA;
+  --purple: #7C3AED;
+  --purple2: #8B5CF6;
+  --glow-blue: rgba(37, 99, 235, 0.5);
+  --text: #F0F6FF;
+  --text2: rgba(240, 246, 255, 0.55);
+  --border: rgba(59, 130, 246, 0.15);
+  --green: #10B981;
+  --amber: #F59E0B;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 900;
+}
+
+a {
+  text-decoration: none;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.z-neg-1 {
+  z-index: -1 !important;
+}
+
+.z-5 {
+  z-index: 5 !important;
+}
+
+.glass-panel {
+  background: rgba(4, 13, 33, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+}

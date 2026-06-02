@@ -18,6 +18,10 @@ CREATE TABLE drivers (
   id              UUID PRIMARY KEY REFERENCES users(id),
   vehicle_type    TEXT CHECK (vehicle_type IN ('bike','car','van','truck')),
   vehicle_number  TEXT,
+  license_number  TEXT,
+  vehicle_registration TEXT,
+  aadhar_card     TEXT,
+  address         TEXT,
   is_available    BOOLEAN DEFAULT false,
   is_online       BOOLEAN DEFAULT false,
   current_location GEOMETRY(Point, 4326),  -- PostGIS live location

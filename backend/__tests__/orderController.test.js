@@ -1,7 +1,8 @@
 jest.mock('../models/Order');
-jest.mock('../models/User');
 jest.mock('../services/mapsService');
-jest.mock('../config/db');
+jest.mock('../config/db', () => ({
+  query: jest.fn(),
+}));
 
 const orderController = require('../controllers/orderController');
 const Order = require('../models/Order');
@@ -75,22 +76,56 @@ describe('OrderController', () => {
       expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    it('should return 500 on geocoding failure', async () => {
-      req.body = {
-        pickupAddress: 'Invalid Address',
-        deliveryAddress: '456 Oak Ave',
-      };
+it('should return 500 on geocoding failure', async () => {
+       req.body = {
+         pickupAddress: 'Invalid Address',
+         deliveryAddress: '456 Oak Ave',
+       };
 
-      MapsService.geocode.mockRejectedValue(new Error('Geocoding failed'));
+       MapsService.geocode.mockRejectedValueOnce(new Error('Geocoding failed'));
 
-      await orderController.createOrder(req, res);
+       await orderController.createOrder(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        message: 'Internal server error',
-        code: 'INTERNAL_ERROR',
-      });
-    });
+       expect(res.status).toHaveBeenCalledWith(500);
+       expect(res.json).toHaveBeenCalledWith({
+         message: 'Internal server error',
+         code: 'INTERNAL_ERROR',
+       });
+     });
+
+     it('should use provided coordinates without geocoding', async () => {
+       req.body = {
+         pickupAddress: '123 Main St',
+         deliveryAddress: '456 Oak Ave',
+         pickupLat: 40.7128,
+         pickupLng: -74.006,
+         deliveryLat: 40.7306,
+         deliveryLng: -73.9352,
+       };
+
+       MapsService.getDirections.mockResolvedValue({
+         distance: 10.5,
+         duration: 30,
+         polyline: 'encoded-polyline',
+       });
+
+       const newOrder = {
+         id: 'order-1',
+         customer_id: 'customer-1',
+         pickup_address: '123 Main St',
+         delivery_address: '456 Oak Ave',
+         status: 'pending',
+       };
+       Order.create.mockResolvedValue(newOrder);
+       Order.updateDistanceDuration.mockResolvedValue({ ...newOrder, estimated_distance: 10.5, estimated_duration: 30, route_polyline: 'encoded-polyline' });
+       Order.findById.mockResolvedValue({ ...newOrder, estimated_distance: 10.5, estimated_duration: 30 });
+
+       await orderController.createOrder(req, res);
+
+       expect(MapsService.geocode).not.toHaveBeenCalled();
+       expect(MapsService.getDirections).toHaveBeenCalled();
+       expect(res.status).toHaveBeenCalledWith(201);
+     });
   });
 
   describe('getOrders', () => {

@@ -3,16 +3,29 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import { Dropdown } from 'primereact/dropdown';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
+import { Toast } from 'primereact/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import useOrderStore from '../store/orderStore';
 import useAuthStore from '../store/authStore';
+import adminApi from '../services/adminApi';
 
 const AdminPanel = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showUserDialog, setShowUserDialog] = useState(false);
+  const [showDriverDialog, setShowDriverDialog] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [driverForm, setDriverForm] = useState({});
+  const [drivers, setDrivers] = useState([]);
+  const [users, setUsers] = useState([
+    { id: '1', name: 'John Doe', email: 'john@example.com', role: 'customer', orders: 12 },
+    { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'driver', orders: 28 },
+    { id: '3', name: 'Bob Wilson', email: 'bob@example.com', role: 'admin', orders: 0 }
+  ]);
+  const toast = React.useRef(null);
   const { user } = useAuthStore();
 
   const statusBodyTemplate = (rowData) => {
@@ -39,20 +52,14 @@ const AdminPanel = () => {
     );
   };
 
-  const actionBodyTemplate = (rowData) => {
+  const actionBodyTemplate = (rowData, rowIndex) => {
     return (
       <div className="flex gap-2">
-        <Button icon="pi pi-pencil" className="p-button-rounded p-button-sm" />
+        <Button icon="pi pi-pencil" className="p-button-rounded p-button-sm" onClick={() => openEditDriver(rowData)} />
         <Button icon="pi pi-trash" className="p-button-rounded p-button-danger p-button-sm" />
       </div>
     );
   };
-
-  const users = [
-    { id: '1', name: 'John Doe', email: 'john@example.com', role: 'customer', orders: 12 },
-    { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'driver', orders: 28 },
-    { id: '3', name: 'Bob Wilson', email: 'bob@example.com', role: 'admin', orders: 0 }
-  ];
 
   const orders = [
     { id: 'ORD001', pickup_address: '123 Main St', delivery_address: '456 Oak Ave', status: 'delivered', driver: 'Mike Driver', priority: 'normal' },
@@ -67,8 +74,58 @@ const AdminPanel = () => {
     { icon: 'pi pi-dollar', label: 'Revenue', value: '$24,890', color: 'yellow' }
   ];
 
+  const vehicleTypes = [
+    { label: 'Bike', value: 'bike' },
+    { label: 'Car', value: 'car' },
+    { label: 'Van', value: 'van' },
+    { label: 'Truck', value: 'truck' }
+  ];
+
+  const fetchDrivers = async () => {
+    try {
+      const response = await adminApi.getDrivers();
+      setDrivers(response.data.drivers || []);
+    } catch (error) {
+      console.error('Failed to fetch drivers:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
+  const openEditDriver = async (driver) => {
+    setSelectedDriver(driver);
+    setDriverForm({
+      name: driver.name || '',
+      email: driver.email || '',
+      phone: driver.phone || '',
+      vehicle_type: driver.vehicle_type || '',
+      vehicle_number: driver.vehicle_number || '',
+      license_number: driver.license_number || '',
+      vehicle_registration: driver.vehicle_registration || '',
+      aadhar_card: driver.aadhar_card || '',
+      address: driver.address || '',
+      zone: driver.zone || ''
+    });
+    setShowDriverDialog(true);
+  };
+
+  const handleUpdateDriver = async () => {
+    if (!selectedDriver?.id) return;
+    try {
+      await adminApi.updateDriverProfile(selectedDriver.id, driverForm);
+      toast.current.show({ severity: 'success', summary: 'Updated', detail: 'Driver profile updated', life: 3000 });
+      setShowDriverDialog(false);
+      fetchDrivers();
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to update driver profile', life: 3000 });
+    }
+  };
+
   return (
     <div className="py-4 px-3" style={{ minHeight: 'calc(100vh - 80px)', background: 'rgba(15,23,42,0.3)' }}>
+      <Toast ref={toast} />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -83,7 +140,7 @@ const AdminPanel = () => {
             </div>
             <div className="flex gap-2">
               <Button icon="pi pi-bell" className="p-button-rounded p-button-text" badge="5" />
-              <Button icon="pi pi-refresh" className="p-button-rounded p-button-text" />
+              <Button icon="pi pi-refresh" className="p-button-rounded p-button-text" onClick={fetchDrivers} />
             </div>
           </div>
         </div>
@@ -116,6 +173,24 @@ const AdminPanel = () => {
                   <Column field="delivery_address" header="Delivery" />
                   <Column field="status" header="Status" body={statusBodyTemplate} />
                   <Column header="Driver" body={driverBodyTemplate} />
+                  <Column header="Actions" body={actionBodyTemplate} />
+                </DataTable>
+              </Card>
+            </motion.div>
+          </TabPanel>
+
+          <TabPanel header="Drivers" leftIcon="pi pi-truck">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+              <Card className="border-round-xl shadow-2" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
+                <DataTable value={drivers} paginator rows={10} className="p-datatable-sm">
+                  <Column field="id" header="Driver ID" />
+                  <Column field="name" header="Name" />
+                  <Column field="email" header="Email" />
+                  <Column field="vehicle_type" header="Vehicle" />
+                  <Column field="vehicle_number" header="Vehicle No" />
+                  <Column field="zone" header="Zone" />
+                  <Column field="is_available" header="Available" />
+                  <Column field="rating" header="Rating" />
                   <Column header="Actions" body={actionBodyTemplate} />
                 </DataTable>
               </Card>
@@ -192,9 +267,9 @@ const AdminPanel = () => {
           </TabPanel>
         </TabView>
 
-        <Dialog 
-          visible={showUserDialog} 
-          onHide={() => setShowUserDialog(false)} 
+        <Dialog
+          visible={showUserDialog}
+          onHide={() => setShowUserDialog(false)}
           header="Add New User"
           style={{ width: '400px' }}
           className="surface-card border-round-xl"
@@ -210,6 +285,61 @@ const AdminPanel = () => {
           <div className="flex justify-content-end gap-2">
             <Button label="Cancel" className="p-button-text" onClick={() => setShowUserDialog(false)} />
             <Button label="Add User" />
+          </div>
+        </Dialog>
+
+        <Dialog
+          visible={showDriverDialog}
+          onHide={() => setShowDriverDialog(false)}
+          header="Edit Driver Profile"
+          style={{ width: '600px' }}
+          className="surface-card border-round-xl"
+        >
+          <div className="grid">
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Full Name</label>
+              <InputText value={driverForm.name || ''} onChange={(e) => setDriverForm({ ...driverForm, name: e.target.value })} className="w-full" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Email</label>
+              <InputText value={driverForm.email || ''} onChange={(e) => setDriverForm({ ...driverForm, email: e.target.value })} className="w-full" type="email" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Phone</label>
+              <InputText value={driverForm.phone || ''} onChange={(e) => setDriverForm({ ...driverForm, phone: e.target.value })} className="w-full" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Vehicle Type</label>
+              <Dropdown value={driverForm.vehicle_type || ''} options={vehicleTypes} onChange={(e) => setDriverForm({ ...driverForm, vehicle_type: e.value })} className="w-full" placeholder="Select vehicle type" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Vehicle Number</label>
+              <InputText value={driverForm.vehicle_number || ''} onChange={(e) => setDriverForm({ ...driverForm, vehicle_number: e.target.value })} className="w-full" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">License Number</label>
+              <InputText value={driverForm.license_number || ''} onChange={(e) => setDriverForm({ ...driverForm, license_number: e.target.value })} className="w-full" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Vehicle Registration</label>
+              <InputText value={driverForm.vehicle_registration || ''} onChange={(e) => setDriverForm({ ...driverForm, vehicle_registration: e.target.value })} className="w-full" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Aadhar Card</label>
+              <InputText value={driverForm.aadhar_card || ''} onChange={(e) => setDriverForm({ ...driverForm, aadhar_card: e.target.value })} className="w-full" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Address</label>
+              <InputText value={driverForm.address || ''} onChange={(e) => setDriverForm({ ...driverForm, address: e.target.value })} className="w-full" />
+            </div>
+            <div className="col-12 md:col-6 field mb-3">
+              <label className="block mb-1">Zone</label>
+              <InputText value={driverForm.zone || ''} onChange={(e) => setDriverForm({ ...driverForm, zone: e.target.value })} className="w-full" />
+            </div>
+          </div>
+          <div className="flex justify-content-end gap-2 mt-4">
+            <Button label="Cancel" className="p-button-text" onClick={() => setShowDriverDialog(false)} />
+            <Button label="Save Changes" icon="pi pi-check" onClick={handleUpdateDriver} />
           </div>
         </Dialog>
       </motion.div>

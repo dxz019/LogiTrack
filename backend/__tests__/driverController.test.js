@@ -3,6 +3,12 @@ jest.mock('../models/Order');
 jest.mock('../config/db', () => ({
   query: jest.fn(),
 }));
+jest.mock('../queues/notificationQueue', () => ({
+  add: jest.fn().mockResolvedValue({}),
+}));
+jest.mock('../services/assignmentEngine', () => ({
+  assignDriver: jest.fn().mockResolvedValue({}),
+}));
 
 const driverController = require('../controllers/driverController');
 const Driver = require('../models/Driver');
@@ -42,6 +48,14 @@ describe('DriverController', () => {
       expect(pool.query).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({ orders: mockOrders });
     });
+
+    it('should handle database errors', async () => {
+      pool.query.mockRejectedValue(new Error('DB error'));
+
+      await driverController.getMyOrders(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
   });
 
   describe('updateStatus', () => {
@@ -65,6 +79,18 @@ describe('DriverController', () => {
 
       expect(Driver.setAvailability).toHaveBeenCalledWith('driver-1', true);
     });
+
+    it('should set driver unavailable when going offline', async () => {
+      req.body = { isOnline: false };
+      const driver = { id: 'driver-1', is_online: false, is_available: false };
+      Driver.setOnline.mockResolvedValue(driver);
+      Driver.setAvailability.mockResolvedValue(driver);
+
+      await driverController.updateStatus(req, res);
+
+      expect(Driver.setOnline).toHaveBeenCalledWith('driver-1', false);
+      expect(Driver.setAvailability).toHaveBeenCalledWith('driver-1', false);
+    });
   });
 
   describe('acceptOrder', () => {
@@ -74,6 +100,12 @@ describe('DriverController', () => {
       Order.findById.mockResolvedValue(order);
       Order.updateStatus.mockResolvedValue({ ...order, status: 'accepted' });
       Driver.setAvailability.mockResolvedValue({});
+      Driver.getDriverWithLocation.mockResolvedValue({
+        name: 'Driver Name',
+        phone: '1234567890',
+        vehicle_type: 'car',
+        rating: 4.8,
+      });
 
       await driverController.acceptOrder(req, res);
 
@@ -90,6 +122,15 @@ describe('DriverController', () => {
 
       expect(res.status).toHaveBeenCalledWith(403);
     });
+
+    it('should return 404 if order not found', async () => {
+      req.params = { id: 'order-1' };
+      Order.findById.mockResolvedValue(null);
+
+      await driverController.acceptOrder(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+    });
   });
 
   describe('pickupOrder', () => {
@@ -103,6 +144,16 @@ describe('DriverController', () => {
 
       expect(Order.markPickedUp).toHaveBeenCalledWith('order-1');
     });
+
+    it('should return 400 if order status is not accepted', async () => {
+      req.params = { id: 'order-1' };
+      const order = { id: 'order-1', driver_id: 'driver-1', status: 'pending', customer_id: 'customer-1' };
+      Order.findById.mockResolvedValue(order);
+
+      await driverController.pickupOrder(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+    });
   });
 
   describe('deliverOrder', () => {
@@ -113,25 +164,54 @@ describe('DriverController', () => {
       Order.findById.mockResolvedValue(order);
       Order.markDelivered.mockResolvedValue({ ...order, status: 'delivered' });
       Driver.setAvailability.mockResolvedValue({});
-      pool.query.mockResolvedValue({});
 
       await driverController.deliverOrder(req, res);
 
       expect(Order.markDelivered).toHaveBeenCalled();
     });
+
+    it('should increment driver total deliveries on delivery', async () => {
+      req.params = { id: 'order-1' };
+      req.file = { filename: 'proof.jpg' };
+      const order = { id: 'order-1', driver_id: 'driver-1', status: 'picked_up', customer_id: 'customer-1' };
+      Order.findById.mockResolvedValue(order);
+      Order.markDelivered.mockResolvedValue({ ...order, status: 'delivered' });
+      Driver.setAvailability.mockResolvedValue({});
+
+      await driverController.deliverOrder(req, res);
+
+      expect(pool.query).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE drivers'),
+        ['driver-1']
+      );
+    });
   });
 
   describe('rejectOrder', () => {
-    it('should reject and reassess order', async () => {
+    it('should reject and reset order to pending', async () => {
       req.params = { id: 'order-1' };
       const order = { id: 'order-1', driver_id: 'driver-1', status: 'assigned', customer_id: 'customer-1' };
       Order.findById.mockResolvedValue(order);
-      Order.updateStatus.mockResolvedValue({});
-      pool.query.mockResolvedValue({});
+      Order.updateStatus.mockResolvedValue({ ...order, status: 'pending' });
 
       await driverController.rejectOrder(req, res);
 
       expect(Order.updateStatus).toHaveBeenCalledWith('order-1', 'pending');
+      expect(res.json).toHaveBeenCalled();
+    });
+
+    it('should clear driver_id on rejection', async () => {
+      req.params = { id: 'order-1' };
+      const order = { id: 'order-1', driver_id: 'driver-1', status: 'assigned', customer_id: 'customer-1' };
+      Order.findById.mockResolvedValue(order);
+      Order.updateStatus.mockResolvedValue({ ...order, status: 'pending' });
+
+      await driverController.rejectOrder(req, res);
+
+      expect(pool.query).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE orders'),
+        ['order-1']
+      );
     });
   });
 });

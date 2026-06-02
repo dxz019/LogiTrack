@@ -140,6 +140,80 @@ class AdminController {
       res.status(500).json({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
     }
   }
+
+  static async getDriverProfile(req, res) {
+    try {
+      const driverId = req.params.id;
+      const result = await pool.query(`
+        SELECT d.*, u.name, u.email, u.phone, u.role
+        FROM drivers d
+        JOIN users u ON d.id = u.id
+        WHERE d.id = $1
+      `, [driverId]);
+      if (!result.rows.length) {
+        return res.status(404).json({ message: 'Driver not found', code: 'DRIVER_NOT_FOUND' });
+      }
+      res.json({ driver: result.rows[0] });
+    } catch (error) {
+      logger.error('Error fetching driver profile:', error);
+      res.status(500).json({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
+    }
+  }
+
+  static async updateDriverProfile(req, res) {
+    try {
+      const driverId = req.params.id;
+      const updates = req.body;
+
+      const allowedDriverFields = ['vehicle_type','vehicle_number','license_number','vehicle_registration','aadhar_card','address','zone'];
+      const allowedUserFields = ['name','email','phone'];
+
+      const driverSet = [];
+      const userSet = [];
+      const values = [];
+      let idx = 1;
+
+      Object.keys(updates).forEach((key) => {
+        if (allowedDriverFields.includes(key) && updates[key] !== undefined) {
+          driverSet.push(`${key} = $${idx}`);
+          values.push(updates[key]);
+          idx++;
+        } else if (allowedUserFields.includes(key) && updates[key] !== undefined) {
+          userSet.push(`${key} = $${idx}`);
+          values.push(updates[key]);
+          idx++;
+        }
+      });
+
+      if (!driverSet.length && !userSet.length) {
+        return res.status(400).json({ message: 'No valid fields provided', code: 'NO_VALID_FIELDS' });
+      }
+
+      values.push(driverId);
+
+      if (driverSet.length) {
+        const sql = `UPDATE drivers SET ${driverSet.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING *`;
+        await pool.query(sql, values);
+      }
+
+      if (userSet.length) {
+        const sql = `UPDATE users SET ${userSet.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING id`;
+        await pool.query(sql, values);
+      }
+
+      const result = await pool.query(`
+        SELECT d.*, u.name, u.email, u.phone
+        FROM drivers d
+        JOIN users u ON d.id = u.id
+        WHERE d.id = $1
+      `, [driverId]);
+
+      res.json({ driver: result.rows[0] });
+    } catch (error) {
+      logger.error('Error updating driver profile:', error);
+      res.status(500).json({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
+    }
+  }
 }
 
 module.exports = AdminController;

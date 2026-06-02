@@ -1,3 +1,6 @@
+// Place Order Form - Clean white design for customers to create deliveries
+// Uses Google Maps integration for address autocomplete (demo uses mock coordinates)
+
 import React, { useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
@@ -5,7 +8,6 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Card } from 'primereact/card';
 import { useNavigate } from 'react-router-dom';
-import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import useOrderStore from '../../store/orderStore';
 
 export const PlaceOrderForm = () => {
@@ -16,8 +18,7 @@ export const PlaceOrderForm = () => {
     priority: 'normal'
   });
   
-  // For a real app, you would use Google Places Autocomplete here
-  // and extract lat/lng. For this demo we'll use placeholder coords.
+  // Demo coordinates - in production these would come from Google Places Autocomplete
   const mockCoords = {
     pickupLat: 40.7128,
     pickupLng: -74.0060,
@@ -30,8 +31,8 @@ export const PlaceOrderForm = () => {
 
   const priorities = [
     { label: 'Normal Delivery', value: 'normal' },
-    { label: 'Express Delivery (+$5)', value: 'express' },
-    { label: 'Urgent Delivery (+$10)', value: 'urgent' }
+    { label: 'Express (+$5)', value: 'express' },
+    { label: 'Urgent (+$10)', value: 'urgent' }
   ];
 
   const handleChange = (e) => {
@@ -44,11 +45,7 @@ export const PlaceOrderForm = () => {
     if (!formData.pickupAddress || !formData.deliveryAddress) return;
 
     try {
-      const order = await placeOrder({
-        ...formData,
-        ...mockCoords
-      });
-      // Redirect to tracking page
+      const order = await placeOrder({ ...formData, ...mockCoords });
       navigate(`/track/${order.id}`);
     } catch (err) {
       console.error("Failed to place order", err);
@@ -56,78 +53,72 @@ export const PlaceOrderForm = () => {
   };
 
   return (
-    <Card className="shadow-3 border-round-xl max-w-30rem mx-auto">
-      <h2 className="mt-0 mb-4 text-center text-primary">Place New Delivery</h2>
+    <Card className="shadow-3 border-round-xl max-w-30rem mx-auto bg-white">
+      <h2 className="mt-0 mb-4 text-center text-blue-600">Place New Delivery</h2>
       
-      {error && <div className="p-3 mb-4 bg-red-100 text-red-800 border-round text-sm">{error}</div>}
+      {error && <div className="p-3 mb-4 bg-red-50 text-red-600 border-round">{error}</div>}
 
       <form onSubmit={handleSubmit} className="p-fluid">
         <div className="field mb-4">
-          <label htmlFor="pickupAddress" className="font-bold block mb-2">Pickup Address</label>
-          <div className="p-inputgroup">
-            <span className="p-inputgroup-addon bg-primary-reverse border-primary">
-                <i className="pi pi-map-marker text-green-500"></i>
-            </span>
+          <span className="p-input-icon-left w-full">
+            <i className="pi pi-map-marker text-green-500" />
             <InputText 
               id="pickupAddress" 
               name="pickupAddress" 
               value={formData.pickupAddress} 
               onChange={handleChange} 
-              placeholder="123 Origin St, City"
-              className="p-inputtext-lg"
+              placeholder="Pickup address"
+              className="w-full border-round-lg bg-white py-3 px-4 border-1 border-gray-300"
               required 
             />
-          </div>
+          </span>
         </div>
 
         <div className="field mb-4">
-          <label htmlFor="deliveryAddress" className="font-bold block mb-2">Delivery Address</label>
-          <div className="p-inputgroup">
-            <span className="p-inputgroup-addon bg-primary-reverse border-primary">
-                <i className="pi pi-flag text-red-500"></i>
-            </span>
+          <span className="p-input-icon-left w-full">
+            <i className="pi pi-flag text-red-500" />
             <InputText 
               id="deliveryAddress" 
               name="deliveryAddress" 
               value={formData.deliveryAddress} 
               onChange={handleChange} 
-              placeholder="456 Destination Ave, City"
-              className="p-inputtext-lg"
+              placeholder="Delivery address"
+              className="w-full border-round-lg bg-white py-3 px-4 border-1 border-gray-300"
               required 
             />
-          </div>
+          </span>
         </div>
 
         <div className="field mb-4">
-          <label htmlFor="priority" className="font-bold block mb-2">Delivery Speed</label>
           <Dropdown 
             id="priority" 
             name="priority" 
             value={formData.priority} 
             options={priorities} 
             onChange={handleChange} 
-            className="p-inputtext-lg"
+            placeholder="Delivery speed"
+            className="w-full border-round-lg"
           />
         </div>
 
         <div className="field mb-5">
-          <label htmlFor="packageDescription" className="font-bold block mb-2">Package Description</label>
           <InputTextarea 
             id="packageDescription" 
             name="packageDescription" 
             value={formData.packageDescription} 
             onChange={handleChange} 
             rows={3} 
-            placeholder="e.g. Small box, fragile electronics"
+            placeholder="Package details (optional)"
+            className="w-full border-round-lg bg-white py-2 px-3 border-1 border-gray-300"
             autoResize 
           />
         </div>
 
         <Button 
           type="submit" 
-          label={loading ? "Processing..." : "Confirm & Pay"} 
+          label={loading ? "Processing..." : "Confirm Order"} 
           icon={loading ? "pi pi-spin pi-spinner" : "pi pi-check"} 
-          className="p-button-lg p-button-rounded shadow-2"
+          className="w-full p-button-lg p-button-rounded bg-blue-600 border-blue-600 hover:bg-blue-700 py-3"
           disabled={loading || !formData.pickupAddress || !formData.deliveryAddress}
         />
       </form>

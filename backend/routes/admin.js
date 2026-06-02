@@ -25,5 +25,7 @@ const idParamSchema = Joi.object({ id: Joi.string().uuid().required() });
 router.put('/orders/:id/assign', validate(idParamSchema, 'params'), validate(assignSchema), AdminController.assignDriver);
 router.get('/stats', AdminController.getStats);
 router.get('/forecast', AdminController.getForecast);
+router.get('/drivers/:id/profile', AdminController.getDriverProfile);
+router.put('/drivers/:id/profile', AdminController.updateDriverProfile);
 
 module.exports = router;
