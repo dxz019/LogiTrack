@@ -1,5 +1,7 @@
 /* Navbar */
 .navbar {
+  --glass-bg: rgba(2, 8, 24, 0.82);
+  --glass-border: rgba(59, 130, 246, 0.1);
   position: fixed;
   width: 100%;
   height: 64px;
@@ -7,9 +9,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  background: rgba(2, 8, 24, 0.8);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
-  backdrop-filter: blur(20px);
+  background: var(--glass-bg);
+  border-bottom: var(--glass-border) solid 1px;
   z-index: 100;
 }
 
@@ -53,6 +54,10 @@
   transition: color 0.2s ease;
 }
 
+.navbar-link:hover {
+  color: var(--text);
+}
+
 .navbar-link::after {
   content: '';
   position: absolute;
@@ -64,10 +69,6 @@
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.25s ease;
-}
-
-.navbar-link:hover {
-  color: var(--text);
 }
 
 .navbar-link:hover::after {

@@ -52,15 +52,59 @@ h4 {
   z-index: 0;
 }
 
+/* Global glass patterns */
+:root {
+  --glass-bg: rgba(4, 13, 33, 0.82);
+  --glass-border: rgba(59, 130, 246, 0.12);
+  --glass-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+}
+
+.glass {
+  --component-bg: var(--glass-bg);
+  --component-border: var(--glass-border);
+  background: var(--component-bg);
+  border: 1px solid var(--component-border);
+  border-radius: 20px;
+  will-change: transform;
+}
+
+@supports (backdrop-filter: blur(0)) or (-webkit-backdrop-filter: blur(0)) {
+  .glass {
+    --glass-blur: blur(20px) saturate(180%);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+  }
+}
+
+@supports not (backdrop-filter: blur(0)) and not (-webkit-backdrop-filter: blur(0)) {
+  .glass {
+    --component-bg: rgba(4, 13, 33, 0.95);
+  }
+}
+
 /* Navbar */
 .navbar {
+  --glass-bg: rgba(2, 8, 24, 0.82);
+  --glass-border: rgba(59, 130, 246, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  background: rgba(2, 8, 24, 0.75);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+@supports (backdrop-filter: blur(0)) or (-webkit-backdrop-filter: blur(0)) {
+  .navbar {
+    --glass-bg: rgba(2, 8, 24, 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+}
+
+@supports not (backdrop-filter: blur(0)) and not (-webkit-backdrop-filter: blur(0)) {
+  .navbar {
+    --glass-bg: rgba(2, 8, 24, 0.95);
+  }
 }
 
 .logo i {
@@ -198,12 +242,12 @@ h4 {
 
 /* Stats */
 .stats-card {
+  --stats-bg: rgba(255, 255, 255, 0.05);
+  --stats-border: rgba(255, 255, 255, 0.08);
   text-align: center;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: var(--stats-bg);
+  border: var(--stats-border) solid 1px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -214,6 +258,20 @@ h4 {
 
 .stats-card h2 {
   color: #60a5fa;
+}
+
+@supports (backdrop-filter: blur(0)) or (-webkit-backdrop-filter: blur(0)) {
+  .stats-card {
+    --stats-bg: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+}
+
+@supports not (backdrop-filter: blur(0)) and not (-webkit-backdrop-filter: blur(0)) {
+  .stats-card {
+    --stats-bg: rgba(255, 255, 255, 0.08);
+  }
 }
 
 /* Map inside dashboard */
